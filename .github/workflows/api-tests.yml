@@ -80,8 +80,32 @@ jobs:
           name: api-test-reports
           path: test-results/*.html
 
-      - name: Add summary for failed tests
-        if: failure()
+      - name: Add summary
+        if: always()
         run: |
-          echo "### ❌ API 测试失败" >> $GITHUB_STEP_SUMMARY
-          echo "请前往本次 Actions 构建的下方 Artifacts 下载 HTML 报告查看详情。" >> $GITHUB_STEP_SUMMARY
+          echo "### 📋 API 测试报告摘要" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ⏰ 执行时间（UTC）：$(date -u '+%Y-%m-%d %H:%M:%S')" >> $GITHUB_STEP_SUMMARY
+          echo "- 🌍 运行环境：\`${{ env.ENV }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ 测试集合：" >> $GITHUB_STEP_SUMMARY
+      
+          if [[ -f test-results/users-report.html ]]; then
+            echo "  - 🧪 User API Tests：已生成报告 ✅" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "  - 🧪 User API Tests：未生成报告 ⚠️" >> $GITHUB_STEP_SUMMARY
+          fi
+      
+          if [[ -f test-results/health-report.html ]]; then
+            echo "  - 🧪 Health API Tests：已生成报告 ✅" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "  - 🧪 Health API Tests：未生成报告 ⚠️" >> $GITHUB_STEP_SUMMARY
+          fi
+      
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- 📦 报告下载：" >> $GITHUB_STEP_SUMMARY
+          echo "  - 👉 请在本次运行下方 Artifacts 中下载 \`api-test-reports\`，解压后查看 HTML 报告。" >> $GITHUB_STEP_SUMMARY
+      
+          if [[ "${{ job.status }}" == "failure" ]]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### ❌ 注意：本次测试存在失败项，请仔细检查 HTML 报告断言详情。" >> $GITHUB_STEP_SUMMARY
+          fi
