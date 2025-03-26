@@ -1,0 +1,70 @@
+{
+    "info": {
+        "name": "User API Tests",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "GET All Users",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Status code is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "pm.test('Response is an array', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.expect(Array.isArray(jsonData)).to.be.true;",
+                            "});"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/users",
+                    "host": ["{{baseUrl}}"],
+                    "path": ["users"]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "POST Import Users",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Status code is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/users/import",
+                    "host": ["{{baseUrl}}"],
+                    "path": ["users", "import"]
+                }
+            },
+            "response": []
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "https://www.yiqian.site"
+        }
+    ]
+}

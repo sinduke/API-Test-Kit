@@ -1,0 +1,11 @@
+{
+    "id": "dev-env",
+    "name": "Development",
+    "values": [
+        {
+            "key": "baseUrl",
+            "value": "https://www.yiqian.site",
+            "enabled": true
+        }
+    ]
+}

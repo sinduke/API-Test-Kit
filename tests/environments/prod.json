@@ -1,0 +1,11 @@
+{
+    "id": "prod-env",
+    "name": "Production",
+    "values": [
+        {
+            "key": "baseUrl",
+            "value": "https://test.yiqian.site",
+            "enabled": true
+        }
+    ]
+}

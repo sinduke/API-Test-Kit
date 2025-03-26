@@ -1,0 +1,79 @@
+name: API Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron: "*/5 * * * *"   # 每5分钟运行
+    - cron: "0 0 * * *"     # 每天0点运行（UTC）
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to test (dev, staging, prod)'
+        required: true
+        default: 'dev'
+
+jobs:
+  test-api:
+    runs-on: ubuntu-latest
+
+    env:
+      ENV: ${{ github.event.inputs.environment || 'dev' }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set current UTC time
+        id: set_time
+        run: |
+          echo "CURRENT_UTC=$(date -u +'%H:%M')" >> $GITHUB_ENV
+
+      - name: Check if should run (skip duplicate 00:00 run)
+        if: github.event_name == 'schedule'
+        run: |
+          echo "Current time (UTC): $CURRENT_UTC"
+          if [[ "$CURRENT_UTC" == "00:00" && "$GITHUB_EVENT_SCHEDULE_CRON" != "0 0 * * *" ]]; then
+            echo "Skipping 5-minutely task at midnight to avoid duplicate."
+            exit 0
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Newman
+        run: npm install -g newman newman-reporter-html
+
+      - name: Ensure test-results folder exists
+        run: mkdir -p test-results
+
+      - name: Run User API Tests
+        run: |
+          newman run tests/collections/users.json \
+            --environment "tests/environments/${ENV}.json" \
+            --reporters cli,html \
+            --reporter-html-export "test-results/users-report.html"
+        env:
+          BASE_URL: ${{ secrets.API_BASE_URL }}
+
+      - name: Run Health API Tests
+        run: |
+          newman run tests/collections/health.json \
+            --environment "tests/environments/${ENV}.json" \
+            --reporters cli,html \
+            --reporter-html-export "test-results/health-report.html"
+        env:
+          BASE_URL: ${{ secrets.API_BASE_URL }}
+
+      - name: Upload Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-test-reports
+          path: test-results/*.html
