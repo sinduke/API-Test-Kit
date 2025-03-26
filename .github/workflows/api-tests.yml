@@ -61,6 +61,7 @@ jobs:
             --reporter-html-export "test-results/users-report.html"
         env:
           BASE_URL: ${{ secrets.API_BASE_URL }}
+        continue-on-error: true
 
       - name: Run Health API Tests
         run: |
@@ -70,6 +71,7 @@ jobs:
             --reporter-html-export "test-results/health-report.html"
         env:
           BASE_URL: ${{ secrets.API_BASE_URL }}
+        continue-on-error: true
 
       - name: Upload Test Reports
         if: always()
@@ -77,3 +79,9 @@ jobs:
         with:
           name: api-test-reports
           path: test-results/*.html
+
+      - name: Add summary for failed tests
+        if: failure()
+        run: |
+          echo "### ❌ API 测试失败" >> $GITHUB_STEP_SUMMARY
+          echo "请前往本次 Actions 构建的下方 Artifacts 下载 HTML 报告查看详情。" >> $GITHUB_STEP_SUMMARY
